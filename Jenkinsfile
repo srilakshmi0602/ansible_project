@@ -103,40 +103,39 @@ pipeline {
             }
         }
         stage('Docker container run') {
-    steps {
-        script {
-            echo "🧩 Checking if the Docker container is already running..."
-
-            // Check if container exists
-            def containerExists = sh(
-                script: "sudo docker ps -a --format '{{.Names}}' | grep -w snapchat-container || true",
-                returnStdout: true
-            ).trim()
-
-            if (containerExists) {
-                echo "⚠️ Container 'snapchat-container' already exists — auto redeploying..."
-
-                echo "🛑 Stopping and removing old container..."
-                sh '''
-                    sudo docker stop snapchat-container || true
-                    sudo docker rm snapchat-container || true
-                '''
-
-                echo "🚀 Starting new container..."
-                sh '''
-                    sudo docker run -d -p 8084:8080 --name snapchat-container sri0602/snapchat-sak-cicd-docker:latest
-                '''
-
-            } else {
-                echo "🚀 No existing container found — starting new one..."
-                sh '''
-                    sudo docker run -d -p 8084:8080 --name snapchat-container sri0602/snapchat-sak-cicd-docker:latest
-                '''
+            steps {
+                script {
+                    echo "🧩 Checking if the Docker container is already running..."
+                    // Check if container exists
+                    def containerExists = sh(
+                        script: "sudo docker ps -a --format '{{.Names}}' | grep -w snapchat-container || true",
+                        returnStdout: true
+                    ).trim()
+                    if (containerExists) {
+                        echo "⚠️ Container 'snapchat-container' already exists."
+                        // Ask user for confirmation
+                        def userChoice = input(
+                            id: 'ContainerRestart',
+                            message: 'Container already running. Do you want to stop and redeploy?',
+                            parameters: [choice(choices: ['Yes', 'No'], description: 'Choose action', name: 'Confirm')]
+                        )
+                        if (userChoice == 'Yes') {
+                            echo "🛑 Stopping and removing old container..."
+                            sh '''
+                                sudo docker stop snapchat-container || true
+                                sudo docker rm snapchat-container || true
+                                echo "🚀 Starting new container..."
+                                sudo docker run -d -p 8084:8080 --name snapchat-container sri0602/snapchat-sak-cicd-docker:latest
+                            '''
+                        } else {
+                            echo "⏩ Skipping container restart as per user choice."
+                        }
+                    } else {
+                        echo "🚀 No existing container found — starting new one..."
+                        sh 'sudo docker run -d -p 8084:8080 --name snapchat-container sri0602/snapchat-sak-cicd-docker:latest'
+                    }
+                }
             }
-        }
-    }
-}
-
         }
     }  
     post {
