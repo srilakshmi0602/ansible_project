@@ -49,7 +49,7 @@ pipeline {
         stage('Docker Tag the Image') {
             steps {
                 echo "Tagging the Docker image..."
-                sh 'sudo docker tag snapchat-sak-cicd-docker sakit333/snapchat-sak-cicd-docker:latest'
+                sh 'sudo docker tag snapchat-sak-cicd-docker sri0602/snapchat-sak-cicd-docker:latest'
             }
             post {
                 success {
@@ -63,7 +63,7 @@ pipeline {
         stage('Docker Push the Image') {
             steps {
                 echo "Pushing the Docker image to DockerHub..."
-                sh 'sudo docker push sakit333/snapchat-sak-cicd-docker:latest'
+                sh 'sudo docker push sri0602/snapchat-sak-cicd-docker:latest'
             }
             post {
                 success {
@@ -78,7 +78,7 @@ pipeline {
             steps {
                 echo "Cleaning up local Docker images..."
                 sh '''
-                    sudo docker rmi sakit333/snapchat-sak-cicd-docker:latest
+                    sudo docker rmi sri0602/snapchat-sak-cicd-docker:latest
                     sudo docker rmi snapchat-sak-cicd-docker
                 '''
             }
@@ -125,14 +125,14 @@ pipeline {
                                 sudo docker stop snapchat-container || true
                                 sudo docker rm snapchat-container || true
                                 echo "🚀 Starting new container..."
-                                sudo docker run -d -p 8084:8080 --name snapchat-container sakit333/snapchat-sak-cicd-docker:latest
+                                sudo docker run -d -p 8084:8080 --name snapchat-container sri0602/snapchat-sak-cicd-docker:latest
                             '''
                         } else {
                             echo "⏩ Skipping container restart as per user choice."
                         }
                     } else {
                         echo "🚀 No existing container found — starting new one..."
-                        sh 'sudo docker run -d -p 8084:8080 --name snapchat-container sakit333/snapchat-sak-cicd-docker:latest'
+                        sh 'sudo docker run -d -p 8084:8080 --name snapchat-container sri0602/snapchat-sak-cicd-docker:latest'
                     }
                 }
             }
